@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Professional Speech-to-Text Transcription</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="logo1.jpg" alt="App Logo" class="logo" />
+      <h1>AI Speech-to-Text Transcription</h1>
+      <p>Upload an audio file and get an accurate transcription in seconds.</p>
+    </header>
+
+    <div class="upload-box">
+      <input type="file" id="audioFile" class="file-input" accept=".mp3, .wav" />
+
+      <div class="options">
+        <label><input type="radio" name="choice" value="full" checked /> Full Transcription</label>
+        <label><input type="radio" name="choice" value="summary" /> Summarize Text</label>
+      </div>
+
+      <label for="language">Choose Language:</label>
+      <select id="language">
+        <option value="english" selected>English</option>
+        <option value="spanish">Spanish</option>
+        <option value="japanese">Japanese</option>
+        <option value="french">French</option>
+      </select>
+
+      <label>
+        <input type="checkbox" id="translateCheckbox"> Translate
+      </label>
+
+      <label for="targetLanguage">Translate To:</label>
+      <select id="targetLanguage" disabled>
+        <option value="english" selected>English</option>
+        <option value="spanish">Spanish</option>
+        <option value="japanese">Japanese</option>
+        <option value="french">French</option>
+      </select>
+
+      <button onclick="uploadFile()" class="upload-btn">Upload & Transcribe</button>
+
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <p id="status" class="status"></p>
+      <div id="transcriptionResult" class="result-box"></div>
+      <a id="downloadBtn" class="download-btn" style="display: none;">Download Transcription</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("translateCheckbox").addEventListener("change", function () {
+      document.getElementById("targetLanguage").disabled = !this.checked;
+    });
+
+    async function uploadFile() {
+      const fileInput = document.getElementById("audioFile");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please select a file first!");
+        return;
+      }
+
+      const choice = document.querySelector('input[name="choice"]:checked').value;
+      const language = document.getElementById("language").value;
+      const translateCheckbox = document.getElementById("translateCheckbox").checked;
+      const targetLanguage = document.getElementById("targetLanguage").value;
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("choice", choice);
+      formData.append("language", language);
+      formData.append("translate", translateCheckbox);
+      if (translateCheckbox) {
+        formData.append("target_language", targetLanguage);
+      }
+
+      const statusElement = document.getElementById("status");
+      statusElement.innerText = "Uploading...";
+
+      const progressBar = document.getElementById("progressBar");
+      progressBar.style.width = "0%";
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + "%";
+        if (progress >= 90) {
+          clearInterval(interval);
+        }
+      }, 200);
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) throw new Error("Server error: " + response.status);
+
+        const data = await response.json();
+        statusElement.innerText = "Processing complete!";
+        progressBar.style.width = "100%";
+
+        const resultElement = document.getElementById("transcriptionResult");
+        resultElement.innerText = data.transcription;
+
+        const blob = new Blob([data.transcription], { type: "text/plain" });
+        const downloadLink = document.getElementById("downloadBtn");
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = "transcription.txt";
+        downloadLink.style.display = "inline-block";
+      } catch (error) {
+        statusElement.innerText = "An error occurred: " + error.message;
+        console.error("Upload error:", error);
+      }
+    }
+  </script>
+</body>
+</html>

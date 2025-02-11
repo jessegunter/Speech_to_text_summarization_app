@@ -1,0 +1,129 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to right, #1d2671, #c33764);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+  
+  /* Container */
+  .container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Header */
+  header {
+    margin-bottom: 20px;
+  }
+  .logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  p {
+    font-weight: 300;
+  }
+  
+  /* Upload Box */
+  .upload-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* File Input */
+  .file-input {
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+  }
+  
+  /* Language Selector */
+  select {
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    background: white;
+    color: black;
+    font-size: 16px;
+  }
+  
+  /* Options */
+  .options {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  /* Upload Button */
+  .upload-btn {
+    background: #ff6f61;
+    color: white;
+    font-size: 16px;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .upload-btn:hover {
+    background: #ff3d31;
+  }
+  
+  /* Progress Bar */
+  .progress-container {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    height: 10px;
+  }
+  .progress-bar {
+    width: 0%;
+    height: 10px;
+    background: #fcd34d;
+    transition: width 0.3s ease;
+  }
+  
+  /* Status Message */
+  .status {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #fcd34d;
+  }
+  
+  /* Download Button */
+  .download-btn {
+    background: #4ade80;
+    color: white;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+  .download-btn:hover {
+    background: #22c55e;
+  }
+  
