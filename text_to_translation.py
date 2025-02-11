@@ -7,16 +7,22 @@ from transformers import AutoTokenizer
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Set API key for OpenAI
+# Initialize OpenAI API client
 client = openai.OpenAI()
 
-# Load Hugging Face tokenizer
+# Load Hugging Face tokenizer for chunking
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
-def preprocess_text(text):
-    """Uses Hugging Face to split long text into smaller, structured chunks before sending to GPT."""
-    sentences = tokenizer.tokenize(text)
-    return " ".join(sentences)  # Returns a properly formatted string
+def chunk_text(text, max_tokens=4000):
+    """Splits text into smaller chunks within OpenAI’s token limit."""
+    tokens = tokenizer.encode(text, add_special_tokens=False)  # Tokenize text
+    chunks = []
+    
+    for i in range(0, len(tokens), max_tokens):
+        chunk = tokens[i : i + max_tokens]  # Take up to max_tokens
+        chunks.append(tokenizer.decode(chunk))  # Convert back to readable text
+
+    return chunks  # Returns a list of chunked text
 
 def summarize_text(text):
     """
@@ -28,14 +34,19 @@ def summarize_text(text):
             messages=[
                 {"role": "system", "content": 
                  "You are an AI that summarizes text efficiently, focusing on key points, numerical data, and critical takeaways. "
-                 "Make the summary easy to read, structured with bullet points if needed, and avoid unnecessary details. "
-                 "Ensure financial figures, percentages, and important stats are included."},
-                {"role": "user", "content": f"Summarize this text by extracting key facts and numbers:\n\n{text}"}
+                 "Make the summary easy to read, structured with bullet points if needed, and avoid unnecessary details."},
+                {"role": "user", "content": f"Summarize this text:\n\n{text}"}
             ]
         )
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Summarization error: {str(e)}"
+
+def summarize_large_text(text):
+    """Summarizes large text by processing it in smaller chunks."""
+    chunks = chunk_text(text, max_tokens=4000)  # Split text into chunks
+    summaries = [summarize_text(chunk) for chunk in chunks]  # Summarize each chunk
+    return summarize_text(" ".join(summaries))  # Final summary
 
 def translate_text(text, target_language):
     """
@@ -55,3 +66,9 @@ def translate_text(text, target_language):
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"Translation error: {str(e)}"
+
+def translate_large_text(text, target_language):
+    """Translates large text by processing it in smaller chunks."""
+    chunks = chunk_text(text, max_tokens=4000)
+    translated_chunks = [translate_text(chunk, target_language) for chunk in chunks]
+    return " ".join(translated_chunks)

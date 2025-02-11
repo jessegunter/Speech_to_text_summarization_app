@@ -3,8 +3,7 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from speech_to_text import transcribe_audio  # Import from your speech-to-text file
-from text_to_translation import summarize_text, translate_text  # Import from your text summarization file
-
+from text_to_translation import summarize_large_text, translate_large_text  # Corrected function imports
 
 # Load environment variables
 load_dotenv()
@@ -30,20 +29,19 @@ def upload_file():
 
     # Retrieve user settings
     user_choice = request.form.get("choice")  # 'full' or 'summary'
-    language = request.form.get("language", "english")
     translate = request.form.get("translate", "false")  # 'true' or 'false'
     target_language = request.form.get("target_language", "english")  # Default to English
 
     # Step 1: Transcribe the audio file using `speech_to_text.py`
     transcription = transcribe_audio(file_path)
-    
+
     # Step 2: Summarization (if user selects 'summary') using `text_to_translation.py`
     if user_choice == "summary":
-        transcription = summarize_text(transcription)
-    
+        transcription = summarize_large_text(transcription)  # ✅ Fixed function call
+
     # Step 3: Translation (if translation is requested) using `text_to_translation.py`
     if translate.lower() == "true":
-        transcription = translate_text(transcription, target_language)
+        transcription = translate_large_text(transcription, target_language)  # ✅ Fixed function call
 
     # Cleanup uploaded file after processing
     os.remove(file_path)
