@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
-from speech_to_text import transcribe_audio  # Import from your speech-to-text file
-from text_to_translation import summarize_large_text, translate_large_text  # Corrected function imports
+from speech_to_text import transcribe_audio  
+from text_to_translation import summarize_large_text, translate_large_text  
 
 # Load environment variables
 load_dotenv()
@@ -16,8 +16,6 @@ CORS(app)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ------------------ API Routes ------------------
-
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "file" not in request.files:
@@ -28,30 +26,32 @@ def upload_file():
     file.save(file_path)
 
     # Retrieve user settings
-    user_choice = request.form.get("choice")  # 'full' or 'summary'
-    translate = request.form.get("translate", "false")  # 'true' or 'false'
-    target_language = request.form.get("target_language", "english")  # Default to English
+    user_choice = request.form.get("choice", "full")
+    translate = request.form.get("translate", "false").lower() == "true"
+    target_language = request.form.get("target_language", "english")
 
-    # Step 1: Transcribe the audio file using `speech_to_text.py`
-    transcription = transcribe_audio(file_path)
+    try:
+        # ✅ Step 1: Transcribe the audio and get confidence score
+        transcription, confidence = transcribe_audio(file_path)  
 
-    # Step 2: Summarization (if user selects 'summary') using `text_to_translation.py`
-    if user_choice == "summary":
-        transcription = summarize_large_text(transcription)  # ✅ Fixed function call
+        # ✅ Step 2: Summarize (if selected)
+        if user_choice == "summary":
+            transcription = summarize_large_text(transcription)
 
-    # Step 3: Translation (if translation is requested) using `text_to_translation.py`
-    if translate.lower() == "true":
-        transcription = translate_large_text(transcription, target_language)  # ✅ Fixed function call
+        # ✅ Step 3: Translate (if requested)
+        if translate:
+            transcription = translate_large_text(transcription, target_language)
 
-    # Cleanup uploaded file after processing
-    os.remove(file_path)
+        os.remove(file_path)  # ✅ Cleanup uploaded file
 
-    return jsonify({
-        "message": "Processing complete!",
-        "transcription": transcription
-    })
+        return jsonify({
+            "message": "Processing complete!",
+            "transcription": transcription,
+            "confidence": confidence  # ✅ Confidence score added to response
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Processing failed: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
-
-

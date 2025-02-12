@@ -50,6 +50,7 @@
       </div>
 
       <p id="status" class="status"></p>
+      <p id="confidenceScore" class="confidence"></p> <!-- ✅ Confidence Score Added Here -->
       <div id="transcriptionResult" class="result-box"></div>
       <a id="downloadBtn" class="download-btn" style="display: none;">Download Transcription</a>
     </div>
@@ -84,7 +85,9 @@
       }
 
       const statusElement = document.getElementById("status");
+      const confidenceElement = document.getElementById("confidenceScore");
       statusElement.innerText = "Uploading...";
+      confidenceElement.innerText = "";  // Clear previous confidence score
 
       const progressBar = document.getElementById("progressBar");
       progressBar.style.width = "0%";
@@ -109,9 +112,13 @@
         statusElement.innerText = "Processing complete!";
         progressBar.style.width = "100%";
 
-        const resultElement = document.getElementById("transcriptionResult");
-        resultElement.innerText = data.transcription;
+        // ✅ Display Confidence Score Below Processing Complete
+        confidenceElement.innerText = `Confidence Score: ${data.confidence}%`;
 
+        // ✅ Display Transcription Result
+        document.getElementById("transcriptionResult").innerText = data.transcription;
+
+        // Enable download option
         const blob = new Blob([data.transcription], { type: "text/plain" });
         const downloadLink = document.getElementById("downloadBtn");
         downloadLink.href = URL.createObjectURL(blob);
